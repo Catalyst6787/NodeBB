@@ -1,0 +1,11 @@
+{
+  "name": "nodebb-plugin-hello-popup",
+  "version": "0.0.1",
+  "descritption": "Show a popup saying hello when the user logs in",
+  "main": "library.js",
+  "author": "lu",
+  "liscense": "MIT",
+  "nbbpm": {
+    "compatibility": "^0.8.0"
+  }
+}
