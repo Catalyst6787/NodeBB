@@ -1,6 +1,0 @@
-{
-    "id": "nodebb-plugin-nils-welcome",
-    "scripts": [
-        "public/welcome.js"
-    ]
-}

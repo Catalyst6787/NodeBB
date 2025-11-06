@@ -7,5 +7,7 @@
   "staticDirs": {
     "public": "./public"
   },
-  "client": "lib/hello.client.js"
+  "client": [
+    "lib/hello.client.js"
+  ]
 }
