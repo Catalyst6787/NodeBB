@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "nodebb-plugin-quickstart": "^0.3.1"
+  }
+}
