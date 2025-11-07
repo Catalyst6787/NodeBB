@@ -1,0 +1,8 @@
+{
+    "name": "nodebb-plugin-nils-welcome",
+    "version": "1.0.0",
+    "description": "Affiche une alerte welcome",
+    "nbbpm": {
+      "compatibility": "^3.0.0"
+    }
+}
