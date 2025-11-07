@@ -10,4 +10,8 @@ AUTH:
   - creer un JWT Access Token (AAT)
     - se connecter avec le arianne wallet
   - recuperer les DPPs
+
+  - stocker l'adresse publique dans les metadonnées auth0
+  - auth0 avec plugin nodebb -> recupérer adresse publique
+  - profit 
   
