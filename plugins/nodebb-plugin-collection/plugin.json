@@ -1,0 +1,20 @@
+{
+    "id": "nodebb-plugin-collection",
+    "name": "Collection of NFT",
+    "description": "Collection of NFT",
+    "library": "./library.js",
+    "hooks" : [
+        {
+            "hook": "filter:user.profileMenu",
+            "method": "addCollection"
+        },
+        {
+            "hook": "static:app.load",
+            "method": "addRoutes"
+        }
+    ],
+    "templates": "./templates",
+    "staticDirs": {
+        "NFTs_images": "./NFTs_images"
+    }
+}
