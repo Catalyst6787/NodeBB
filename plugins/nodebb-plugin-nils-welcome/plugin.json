@@ -1,8 +1,0 @@
-{
-    "id": "nodebb-plugin-nils-welcome",
-    "name": "Nils Welcome",
-    "description": "Affiche une alerte welcome",
-    "scripts": [
-      "public/welcome.js"
-    ]
-}

@@ -1,0 +1,9 @@
+{
+    "name": "nodebb-plugin-collection",
+    "version": "1.0.0",
+    "description": "Collection of NFT",
+    "main": "library.js",
+    "nbbpm": {
+      "compatibility": "^3.0.0"
+    }
+}
