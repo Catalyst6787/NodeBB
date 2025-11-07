@@ -1,0 +1,59 @@
+{
+  "name": "nodebb-plugin-sso-auth0-publickey",
+  "version": "4.2.0",
+  "description": "NodeBB Auth0 SSO",
+  "main": "library.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "nodebb": ">=4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NodeBB-Community/nodebb-plugin-sso-auth0"
+  },
+  "keywords": [
+    "nodebb",
+    "plugin",
+    "auth0",
+    "sso",
+    "single sign on",
+    "registration"
+  ],
+  "author": {
+    "name": "julianlam",
+    "email": "julian@nodebb.org"
+  },
+  "contributors": [
+    {
+      "name": "Julian Lam",
+      "email": "julian@nodebb.org",
+      "url": "https://github.com/julianlam/nodebb-plugin-sso-auth0"
+    },
+    {
+      "name": "Eric Miao",
+      "email": "qjmiao@gmail.com",
+      "url": "https://github.com/qjmiao/nodebb-plugin-sso-auth0"
+    }
+  ],
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/julianlam/nodebb-plugin-sso-auth0/issues"
+  },
+  "readme": "",
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "async": "^3.2.4",
+    "node-fetch": "2",
+    "passport": "^0.6.0",
+    "passport-auth0": "^1.4.3",
+    "winston": "^3.9.0"
+  },
+  "nbbpm": {
+    "compatibility": "^3.2.x || ^4.x"
+  },
+  "devDependencies": {
+    "eslint": "8.x",
+    "eslint-config-nodebb": "0.1.1",
+    "eslint-plugin-import": "2.x"
+  }
+}
