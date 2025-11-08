@@ -360,7 +360,7 @@
           (guard((context != null) ? context['isPublic'] : null) ?
             "checked" :
             "") + 
-          ">\n<label class=\"form-check-label\" for=\"collectionVisibility\">\nCollection publique\n</label>\n</div>\n" :
+          ">\n<label class=\"form-check-label\" for=\"collectionVisibility\">\nPublic\n</label>\n</div>\n" :
         "") + 
       "\n</div>\n<div class=\"row g-3\">\n" + 
       compiled.blocks['items'](helpers, context, guard, iter, helper) + 

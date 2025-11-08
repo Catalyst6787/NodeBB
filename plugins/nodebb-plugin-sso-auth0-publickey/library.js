@@ -18,8 +18,7 @@ const GlobalPublicKeyStore = {
 	}
 };
 
-// Export it so other plugins can access
-module.exports.GlobalPublicKeyStore = GlobalPublicKeyStore;
+// Deprecated direct export removed; store will be exposed on Auth0 export below
 
 
 (function(module) {
@@ -384,6 +383,12 @@ module.exports.GlobalPublicKeyStore = GlobalPublicKeyStore;
 			}
 			callback(null, uid);
 		});
+	};
+
+	// Expose public key accessors alongside Auth0 API
+	Auth0.GlobalPublicKeyStore = GlobalPublicKeyStore;
+	Auth0.getPublicKey = function (uid) {
+		return GlobalPublicKeyStore.get(uid);
 	};
 
 	module.exports = Auth0;

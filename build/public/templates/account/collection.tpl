@@ -239,7 +239,7 @@
 <div class="form-check form-switch">
 <input class="form-check-input" type="checkbox" id="collectionVisibility" {{{ if isPublic }}}checked{{{ end }}}>
 <label class="form-check-label" for="collectionVisibility">
-Collection publique
+Public
 </label>
 </div>
 {{{ end }}}
