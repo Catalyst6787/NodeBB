@@ -4,6 +4,9 @@
     "description": "Collection of NFT",
     "main": "library.js",
     "nbbpm": {
-      "compatibility": "^3.0.0"
+        "compatibility": "^3.0.0"
+    },
+    "dependencies": {
+        "dotenv": "^17.2.3"
     }
 }

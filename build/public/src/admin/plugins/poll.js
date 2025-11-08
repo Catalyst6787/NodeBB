@@ -1,1 +1,0 @@
-module.exports = require('../../../../../node_modules/nodebb-plugin-poll/public/js/admin.js');
