@@ -16,5 +16,8 @@
     "templates": "./templates",
     "staticDirs": {
         "NFTs_images": "./NFTs_images"
+    },
+    "modules": {
+        "forum/account/collection": "./client/account/collection.js"
     }
 }
