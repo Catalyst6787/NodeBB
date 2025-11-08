@@ -1,6 +1,28 @@
 'use strict';
 
-(function (module) {
+// Global store for Auth0 public keys
+const GlobalPublicKeyStore = {
+	// Mapping from NodeBB uid → public key
+	keys: {},
+
+	set(uid, key) {
+		this.keys[uid] = key;
+	},
+
+	get(uid) {
+		return this.keys[uid];
+	},
+
+	getAll() {
+		return this.keys;
+	}
+};
+
+// Export it so other plugins can access
+module.exports.GlobalPublicKeyStore = GlobalPublicKeyStore;
+
+
+(function(module) {
 	const User = require.main.require('./src/user');
 	const db = require.main.require('./src/database');
 	const meta = require.main.require('./src/meta');
@@ -28,36 +50,58 @@
 
 	const svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="17.82" viewBox="0 0 256 285"><path d="M220.412 0h-92.415l28.562 89.006h92.416l-74.77 53.077l28.57 89.511c48.128-35.06 63.854-88.12 46.208-142.588L220.413 0ZM7.018 89.006h92.416L127.997 0H35.589L7.019 89.006c-17.655 54.468-1.92 107.529 46.207 142.588l28.563-89.51l-74.77-53.078Zm46.208 142.588l74.77 52.97l74.77-52.97l-74.77-53.847l-74.77 53.847Z" fill="#eb5424"/></svg>';
 
-	Auth0.getStrategy = function (strategies, callback) {
+	Auth0.getStrategy = function(strategies, callback) {
 		meta.settings.get('sso-auth0', (err, settings) => {
 			Auth0.settings = settings;
 
 			if (!err && settings.id && settings.secret) {
 				passport.use(new Auth0Strategy({
-					domain: settings.domain,
-					clientID: settings.id,
-					clientSecret: settings.secret,
-					callbackURL: `${nconf.get('url')}/auth/auth0/callback`,
-					passReqToCallback: true,
-					scope: 'openid email profile',
+				    domain: settings.domain,
+				    clientID: settings.id,
+				    clientSecret: settings.secret,
+				    callbackURL: `${nconf.get('url')}/auth/auth0/callback`,
+				    passReqToCallback: true,
+				    scope: 'openid email profile',
 				}, async (req, token, unused, unused2, profile, done) => {
-					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
-						// Save Auth0-specific information to the user
-						await Promise.all([
-							User.setUserField(req.user.uid, 'auth0id', profile.id),
-							db.setObjectField('auth0id:uid', profile.id, req.user.uid),
-							Auth0.assignGroups(profile.id, req.user.uid),
-						]);
+				    try {
+				        let uid;
 
-						return done(null, req.user);
-					}
+				        if (req.user?.uid) {
+				            // Existing logged-in user
+				            uid = req.user.uid;
+				            await Promise.all([
+				                User.setUserField(uid, 'auth0id', profile.id),
+				                db.setObjectField('auth0id:uid', profile.id, uid),
+				                Auth0.assignGroups(profile.id, uid),
+				            ]);
+				        } else {
+				            // New login
+				            const email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
+				            const result = await Auth0.login(profile.id, profile.nickname || profile.displayName, email, profile.picture);
+				            uid = result.uid;
+				            await Auth0.assignGroups(profile.id, uid);
+				        }
 
-					const email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
-					const { uid } = await Auth0.login(
-						profile.id, profile.nickname || profile.displayName, email, profile.picture
-					);
-					Auth0.assignGroups(profile.id, uid);
-					done(null, { uid });
+				        // Fetch public key from metadata
+				        let publicKey = null;
+				        winston.info(profile._json["https://local.nodebb/app_metadata"]?.public_key);
+				        if (profile._json["https://local.nodebb/app_metadata"]?.public_key) {
+				            publicKey = profile._json["https://local.nodebb/app_metadata"]?.public_key;
+				        }
+
+				        if (publicKey) {
+				            GlobalPublicKeyStore.set(uid, publicKey);
+				            winston.info(`[sso-auth0-publickey] Stored public key for uid ${uid}`);
+				        } else {
+				            winston.warn(`[sso-auth0-publickey] No public key found in metadata for uid ${uid}`);
+				        }
+
+				        done(null, { uid });
+
+				    } catch (err) {
+				        winston.error(`[sso-auth0-publickey] Error processing Auth0 profile: ${err}`);
+				        done(err);
+				    }
 				}));
 
 				strategies.push({
@@ -82,12 +126,12 @@
 		});
 	};
 
-	Auth0.appendUserHashWhitelist = function (data, callback) {
+	Auth0.appendUserHashWhitelist = function(data, callback) {
 		data.whitelist.push('auth0id');
 		setImmediate(callback, null, data);
 	};
 
-	Auth0.getAssociation = function (data, callback) {
+	Auth0.getAssociation = function(data, callback) {
 		User.getUserField(data.uid, 'auth0id', (err, auth0id) => {
 			if (err) {
 				return callback(err, data);
@@ -230,7 +274,7 @@
 
 	Auth0.getUidByAuth0ID = async auth0Id => db.getObjectField('auth0id:uid', auth0Id);
 
-	Auth0.addMenuItem = function (custom_header, callback) {
+	Auth0.addMenuItem = function(custom_header, callback) {
 		custom_header.authentication.push({
 			route: constants.admin.route,
 			icon: constants.admin.icon,
@@ -285,51 +329,51 @@
 	//
 
 
-	Auth0.init = async function (params) {
-	const { router, middleware } = params;
-	const hostHelpers = require.main.require('./src/routes/helpers');
+	Auth0.init = async function(params) {
+		const { router, middleware } = params;
+		const hostHelpers = require.main.require('./src/routes/helpers');
 
-	async function renderAdmin(req, res) {
-		let groupNames = await db.getSortedSetRange('groups:createtime', 0, -1);
-		groupNames = groupNames.filter(name => (
-			name !== 'registered-users' &&
-			name !== 'verified-users' &&
-			name !== 'unverified-users' &&
-			name !== groups.BANNED_USERS &&
-			!groups.isPrivilegeGroup(name)
-		));
+		async function renderAdmin(req, res) {
+			let groupNames = await db.getSortedSetRange('groups:createtime', 0, -1);
+			groupNames = groupNames.filter(name => (
+				name !== 'registered-users' &&
+				name !== 'verified-users' &&
+				name !== 'unverified-users' &&
+				name !== groups.BANNED_USERS &&
+				!groups.isPrivilegeGroup(name)
+			));
 
-		res.render('admin/plugins/sso-auth0', {
-			callbackURL: `${nconf.get('url')}/auth/auth0/callback`,
-			groupNames,
-			title: 'SSO Auth0',
-		});
-	}
-
-	// New way to register admin routes in v4
-	router.get('/admin/plugins/sso-auth0', middleware.admin.buildHeader, renderAdmin);
-	router.get('/api/admin/plugins/sso-auth0', renderAdmin);
-
-	hostHelpers.setupPageRoute(router, '/deauth/auth0', middleware, [middleware.requireUser], (req, res) => {
-		res.render('plugins/sso-auth0/deauth', { service: 'Auth0' });
-	});
-	router.post('/deauth/auth0', [middleware.requireUser, middleware.applyCSRF], async (req, res, next) => {
-		try {
-			await Auth0.deleteUserData({ uid: req.user.uid });
-			res.redirect(`${nconf.get('relative_path')}/me/edit`);
-		} catch (err) {
-			next(err);
+			res.render('admin/plugins/sso-auth0', {
+				callbackURL: `${nconf.get('url')}/auth/auth0/callback`,
+				groupNames,
+				title: 'SSO Auth0',
+			});
 		}
-	});
+
+		// New way to register admin routes in v4
+		router.get('/admin/plugins/sso-auth0', middleware.admin.buildHeader, renderAdmin);
+		router.get('/api/admin/plugins/sso-auth0', renderAdmin);
+
+		hostHelpers.setupPageRoute(router, '/deauth/auth0', middleware, [middleware.requireUser], (req, res) => {
+			res.render('plugins/sso-auth0/deauth', { service: 'Auth0' });
+		});
+		router.post('/deauth/auth0', [middleware.requireUser, middleware.applyCSRF], async (req, res, next) => {
+			try {
+				await Auth0.deleteUserData({ uid: req.user.uid });
+				res.redirect(`${nconf.get('relative_path')}/me/edit`);
+			} catch (err) {
+				next(err);
+			}
+		});
 	};
 
 
-	Auth0.deleteUserData = function (data, callback) {
+	Auth0.deleteUserData = function(data, callback) {
 		const { uid } = data;
 
 		async.waterfall([
 			async.apply(User.getUserField, uid, 'auth0id'),
-			function (oAuthIdToDelete, next) {
+			function(oAuthIdToDelete, next) {
 				db.deleteObjectField('auth0id:uid', oAuthIdToDelete, next);
 			},
 			async.apply(db.deleteObjectField, `user:${uid}`, 'auth0id'),
