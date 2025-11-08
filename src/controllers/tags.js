@@ -26,8 +26,11 @@ tagsController.getTag = async function (req, res) {
 		tag: tag,
 		breadcrumbs: helpers.buildBreadcrumbs([{ text: '[[tags:tags]]', url: '/tags' }, { text: tag }]),
 		title: `[[pages:tag, ${tag}]]`,
+		template: {
+			tag: true,
+		},
 	};
-	const [settings, cids, categoryData, canPost, isPrivileged, rssToken, isFollowing] = await Promise.all([
+	const [settings, cids, categoryData, canPostGlobal, isPrivileged, rssToken, isFollowing, isAdmin] = await Promise.all([
 		user.getSettings(req.uid),
 		cid || categories.getCidsByPrivilege('categories:cid', req.uid, 'topics:read'),
 		helpers.getSelectedCategory(cid),
@@ -35,7 +38,10 @@ tagsController.getTag = async function (req, res) {
 		user.isPrivileged(req.uid),
 		user.auth.getFeedToken(req.uid),
 		topics.isFollowingTag(req.params.tag, req.uid),
+		user.isAdministrator(req.uid),
 	]);
+	
+	const canPost = canPostGlobal;
 
 	const start = Math.max(0, (page - 1) * settings.topicsPerPage);
 	const stop = start + settings.topicsPerPage - 1;
@@ -46,6 +52,7 @@ tagsController.getTag = async function (req, res) {
 	]);
 
 	templateData.topics = await topics.getTopics(tids, req.uid);
+	templateData.topicCount = topicCount;
 	templateData.canPost = canPost;
 	templateData.showSelect = isPrivileged;
 	templateData.showTopicTools = isPrivileged;

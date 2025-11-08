@@ -284,7 +284,12 @@ async function getCounts(userData, callerUID) {
 	counts.following = userData.followingCount;
 	counts.followers = userData.followerCount;
 	userData.blocksCount = counts.blocks || 0; // for backwards compatibility, remove in 1.16.0
-	userData.counts = counts;
+	
+	const result = await plugins.hooks.fire('filter:accounts.getCounts', {
+		userData: userData,
+		counts: counts,
+	});
+	userData.counts = result.counts;
 }
 
 async function getProfileMenu(uid, callerUID) {

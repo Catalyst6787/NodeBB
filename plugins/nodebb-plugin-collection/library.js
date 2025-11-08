@@ -4,7 +4,7 @@ const display_NFTs = require('./NFTs');
 
 const pluginCollection = {};
 
-pluginCollection.addCollection = function (data) {
+pluginCollection.addCollection = async function (data) {
     data.links.push({
         id: 'collection',
         route: 'collection',
@@ -19,6 +19,28 @@ pluginCollection.addCollection = function (data) {
             canViewInfo: true,
         },
     });
+    return data;
+};
+
+pluginCollection.addCollectionCount = async function (data) {
+    const User = require.main.require('./src/user');
+    const profileUid = data.uid;
+    
+    let walletAddress;
+    try {
+        const Auth0 = require('nodebb-plugin-sso-auth0-publickey/library.js');
+        walletAddress = Auth0 && Auth0.getPublicKey ? Auth0.getPublicKey(profileUid) : undefined;
+    } catch (e) {
+        walletAddress = undefined;
+    }
+    
+    if (walletAddress) {
+        const items = await display_NFTs.getItems(walletAddress);
+        data.counts.collection = items.length;
+    } else {
+        data.counts.collection = 0;
+    }
+    
     return data;
 };
 
@@ -58,6 +80,7 @@ pluginCollection.addRoutes = function (params) {
         payload.isPublic = isPublic;
         payload.isOwner = req.uid === profileUid;
         payload.uid = profileUid;
+        payload.template = { 'account/collection': true };
 
         res.render('account/collection', payload);
     };

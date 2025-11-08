@@ -9,6 +9,10 @@
             "method": "addCollection"
         },
         {
+            "hook": "filter:accounts.getCounts",
+            "method": "addCollectionCount"
+        },
+        {
             "hook": "static:app.load",
             "method": "addRoutes"
         }
