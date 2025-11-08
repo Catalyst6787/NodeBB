@@ -9,35 +9,35 @@
   function compiled(helpers, context, guard, iter, helper) {
     var __escape = helpers.__escape;
     var value = context;
-    return "<div class=\"container mt-5\">\n<div class=\"row justify-content-center\">\n<div class=\"col-md-10 col-lg-8\">\n<div class=\"text-center mb-4\">\n<h1 class=\"mb-3\">" + 
+    return "<div class=\"container py-4\">\n<div class=\"row justify-content-center\">\n<div class=\"col-12 col-xl-10\">\n<div class=\"d-flex flex-column align-items-center text-center mb-4\">\n<h2 class=\"fw-semibold mb-2\">" + 
       __escape(guard((context != null && context['nft'] != null) ? context['nft']['title'] : null)) + 
-      "</h1>\n" + 
+      "</h2>\n" + 
       (guard((context != null && context['nft'] != null) ? context['nft']['reference'] : null) ?
-        "\n<p class=\"text-muted\">Ref: " + 
+        "\n<span class=\"badge text-bg-light border\">" + 
           __escape(guard((context != null && context['nft'] != null) ? context['nft']['reference'] : null)) + 
-          "</p>\n" :
+          "</span>\n" :
         "") + 
-      "\n</div>\n<div class=\"row\">\n<!-- Image -->\n<div class=\"col-md-6 mb-4\">\n<img src=\"" + 
+      "\n</div>\n<div class=\"row g-4 align-items-start\">\n<div class=\"col-12 col-md-6\">\n<div class=\"card border-0 shadow-sm\">\n<img src=\"" + 
       __escape(guard((context != null && context['nft'] != null) ? context['nft']['image'] : null)) + 
-      "\"\nalt=\"" + 
+      "\" alt=\"" + 
       __escape(guard((context != null && context['nft'] != null) ? context['nft']['title'] : null)) + 
-      "\"\nclass=\"img-fluid rounded shadow\"\nstyle=\"max-width: 100%; height: auto;\">\n</div>\n<!-- Détails -->\n<div class=\"col-md-6\">\n<h3 class=\"mb-3\">Caractéristiques</h3>\n" + 
+      "\" class=\"card-img-top rounded-top\">\n</div>\n</div>\n<div class=\"col-12 col-md-6\">\n<div class=\"card border-0 shadow-sm h-100\">\n<div class=\"card-body\">\n<h5 class=\"mb-3\">Caractéristiques</h5>\n" + 
       (guard((context != null && context['nft'] != null && context['nft']['attributes'] != null) ? context['nft']['attributes']['length'] : null) ?
-        "\n<div class=\"list-group\">\n" + 
+        "\n<div class=\"row row-cols-1 g-2\">\n" + 
           compiled.blocks['nft.attributes'](helpers, context, guard, iter, helper) + 
           "\n</div>\n" :
         "") + 
       "\n" + 
       (guard((context != null && context['nft'] != null) ? context['nft']['serialNumber'] : null) ?
-        "\n<div class=\"mt-4\">\n<p class=\"text-muted\">\n<small>Serial Number: " + 
+        "\n<div class=\"mt-3\">\n<div class=\"text-muted\">N° de série</div>\n<div class=\"fw-semibold\">" + 
           __escape(guard((context != null && context['nft'] != null) ? context['nft']['serialNumber'] : null)) + 
-          "</small>\n</p>\n</div>\n" :
+          "</div>\n</div>\n" :
         "") + 
-      "\n</div>\n</div>\n" + 
+      "\n</div>\n</div>\n</div>\n</div>\n" + 
       (guard((context != null && context['nft'] != null) ? context['nft']['description'] : null) ?
-        "\n<div class=\"row mt-4\">\n<div class=\"col-12\">\n<h3>Description</h3>\n<div class=\"text-muted\">\n" + 
+        "\n<div class=\"card border-0 shadow-sm mt-4\">\n<div class=\"card-body\">\n<h5 class=\"mb-3\">Description</h5>\n<div class=\"text-muted\">" + 
           __escape(guard((context != null && context['nft'] != null) ? context['nft']['description'] : null)) + 
-          "\n</div>\n</div>\n</div>\n" :
+          "</div>\n</div>\n</div>\n" :
         "") + 
       "\n</div>\n</div>\n</div>";
   }
@@ -48,11 +48,11 @@
       var value = context;
       return iter(guard((context != null && context['nft'] != null) ? context['nft']['attributes'] : null), function each(key0, index, length, value) {
         var key = key0;
-        return "\n<div class=\"list-group-item d-flex justify-content-between\">\n<strong>" + 
+        return "\n<div class=\"col\">\n<div class=\"d-flex justify-content-between align-items-center rounded px-3 py-2 bg-light\">\n<span class=\"text-muted\">" + 
           __escape(guard((context != null && context['nft'] != null && context['nft']['attributes'] != null && context['nft']['attributes'][key0] != null) ? context['nft']['attributes'][key0]['label'] : null)) + 
-          ":</strong>\n<span>" + 
+          "</span>\n<span class=\"fw-semibold\">" + 
           __escape(guard((context != null && context['nft'] != null && context['nft']['attributes'] != null && context['nft']['attributes'][key0] != null) ? context['nft']['attributes'][key0]['value'] : null)) + 
-          "</span>\n</div>\n";
+          "</span>\n</div>\n</div>\n";
       }, function alt() {
         return "";
       });

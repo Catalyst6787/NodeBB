@@ -354,7 +354,15 @@
         "") + 
       "\n" + 
       compiled.blocks['profile_links'](helpers, context, guard, iter, helper) + 
-      "\n</div>\n</div>\n<div class=\"account-content flex-grow-1 ps-md-2 ps-lg-3 ps-xl-4\" style=\"min-width: 0;\">\n<div class=\"account\">\n<div class=\"row\">\n<div class=\"col-12\">\n<h2>Collection</h2>\n<div class=\"row\">\n" + 
+      "\n</div>\n</div>\n<div class=\"account-content flex-grow-1 ps-md-2 ps-lg-3 ps-xl-4\" style=\"min-width: 0;\">\n<div class=\"d-flex justify-content-between align-items-center mb-3\">\n<h4 class=\"fw-bold mb-0\">Collection</h4>\n" + 
+      (guard((context != null) ? context['isOwner'] : null) ?
+        "\n<div class=\"form-check form-switch\">\n<input class=\"form-check-input\" type=\"checkbox\" id=\"collectionVisibility\" " + 
+          (guard((context != null) ? context['isPublic'] : null) ?
+            "checked" :
+            "") + 
+          ">\n<label class=\"form-check-label\" for=\"collectionVisibility\">\nCollection publique\n</label>\n</div>\n" :
+        "") + 
+      "\n</div>\n<div class=\"row g-3\">\n" + 
       compiled.blocks['items'](helpers, context, guard, iter, helper) + 
       "\n</div>\n</div>\n</div>\n</div>";
   }
@@ -438,15 +446,15 @@
       var value = context;
       return iter(guard((context != null) ? context['items'] : null), function each(key0, index, length, value) {
         var key = key0;
-        return "\n<div class=\"col-md-4 mb-4\">\n<a href=\"" + 
+        return "\n<div class=\"col-12 col-sm-6 col-lg-4\">\n<a href=\"" + 
           __escape(guard((context != null && context['items'] != null && context['items'][key0] != null) ? context['items'][key0]['url'] : null)) + 
-          "\" class=\"text-decoration-none\">\n<div class=\"card h-100\" style=\"cursor: pointer;\">\n<img src=\"" + 
+          "\" class=\"text-decoration-none\">\n<div class=\"card h-100 border-0 shadow-sm\" style=\"cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;\" onmouseover=\"this.style.transform='translateY(-5px)'; this.style.boxShadow='0 0.5rem 1rem rgba(0,0,0,0.15)';\" onmouseout=\"this.style.transform='translateY(0)'; this.style.boxShadow='0 0.125rem 0.25rem rgba(0,0,0,0.075)';\">\n<div style=\"overflow: hidden; border-radius: 0.375rem 0.375rem 0 0;\">\n<img src=\"" + 
           __escape(guard((context != null && context['items'] != null && context['items'][key0] != null) ? context['items'][key0]['image'] : null)) + 
           "\" class=\"card-img-top\" alt=\"" + 
           __escape(guard((context != null && context['items'] != null && context['items'][key0] != null) ? context['items'][key0]['title'] : null)) + 
-          "\">\n<div class=\"card-body\">\n<h5 class=\"card-title text-dark\">" + 
+          "\" style=\"object-fit: cover; height: 250px; width: 100%;\">\n</div>\n<div class=\"card-body p-3\">\n<h6 class=\"card-title text-dark fw-semibold mb-2\">" + 
           __escape(guard((context != null && context['items'] != null && context['items'][key0] != null) ? context['items'][key0]['title'] : null)) + 
-          "</h5>\n<p class=\"card-text text-muted\">" + 
+          "</h6>\n<p class=\"card-text text-muted small mb-0\">" + 
           __escape(guard((context != null && context['items'] != null && context['items'][key0] != null) ? context['items'][key0]['description'] : null)) + 
           "</p>\n</div>\n</div>\n</a>\n</div>\n";
       }, function alt() {
