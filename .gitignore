@@ -76,3 +76,4 @@ test.sh
 
 shell.nix
 .envrc
+build/*
