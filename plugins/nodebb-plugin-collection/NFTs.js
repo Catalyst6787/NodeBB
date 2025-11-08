@@ -1,5 +1,5 @@
 'use strict';
-
+const arianee = require('./arianee');
 const display_NFTs = {};
 
 const nftData = [
@@ -19,12 +19,24 @@ const nftData = [
     }
 ];
 
-display_NFTs.getItems = function (uid) {
-    return nftData;
+display_NFTs.getItems = async function (uid) {
+    try {
+        const nfts = await arianee.fetchUserNFTs(uid);
+        return nfts.length > 0 ? nfts : nftData;
+    } catch (error) {
+        console.error('[NFTs] Error:', error);
+        return nftData;
+    }
 };
 
-display_NFTs.getItemById = function (id) {
-    return nftData.find(nft => nft.id === id);
+display_NFTs.getItemById = async function (id, uid) {
+    try {
+        const nft = await arianee.fetchNFTById(id, uid);
+        return nft || nftData.find(n => n.id === id);
+    } catch (error) {
+        console.error('[NFTs] Error:', error);
+        return nftData.find(n => n.id === id);
+    }
 };
 
 module.exports = display_NFTs;

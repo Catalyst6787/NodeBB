@@ -31,11 +31,11 @@ pluginCollection.addRoutes = function (params) {
         middleware.buildAccountData,
     ];
     
-    const render = function (req, res) {
+    const render = async function (req, res) {
         res.render('account/collection', {
             title: 'Collection',
             uid: req.uid,
-            items: display_NFTs.getItems(req.uid)
+            items: await display_NFTs.getItems(req.uid)
         });
     };
     
@@ -51,7 +51,7 @@ pluginCollection.addRoutes = function (params) {
     
     const renderNFTDetail = async function (req, res) {
         const nftId = req.params.nftId;
-        const nft = display_NFTs.getItemById(nftId);
+        const nft = await display_NFTs.getItemById(nftId, req.uid);
         
         if (!nft) {
             return res.status(404).render('404', { title: 'NFT not found' });
