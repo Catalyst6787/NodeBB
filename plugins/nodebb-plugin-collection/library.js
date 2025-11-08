@@ -1,4 +1,5 @@
 'use strict';
+
 const display_NFTs = require('./NFTs');
 
 const pluginCollection = {};
@@ -32,16 +33,16 @@ pluginCollection.addRoutes = function (params) {
     ];
     
     const render = async function (req, res) {
+        const walletAddress = "0x766c409C2e8618fc570982b9acfF1E1c76a26201";
+        
         res.render('account/collection', {
             title: 'Collection',
-            uid: req.uid,
-            items: await display_NFTs.getItems(req.uid)
+            items: await display_NFTs.getItems(walletAddress)
         });
     };
     
     hostHelpers.setupPageRoute(router, '/user/:userslug/collection', accountMiddlewares, render);
     
-    // Route pour les détails NFT
     const nftMiddlewares = [
         middleware.maintenanceMode,
         middleware.authenticateRequest,
@@ -50,8 +51,7 @@ pluginCollection.addRoutes = function (params) {
     ];
     
     const renderNFTDetail = async function (req, res) {
-        const nftId = req.params.nftId;
-        const nft = await display_NFTs.getItemById(nftId, req.uid);
+        const nft = await display_NFTs.getItemById(req.params.nftId);
         
         if (!nft) {
             return res.status(404).render('404', { title: 'NFT not found' });

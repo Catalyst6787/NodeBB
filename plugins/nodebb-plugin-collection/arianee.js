@@ -1,34 +1,53 @@
 'use strict';
 
+require('dotenv').config();
 const axios = require('axios');
 
 const arianee = {};
 
-const API_URL = 'https://audemarspiguet-hackaton.api.pre-production.arianee.com';
-const API_KEY = 'dbd0346c-6e30-4cea-ad3c-f4aeb3eb6327';
+const API_URL = process.env.API_URL;
+const API_KEY = process.env.ARIANEE_API_KEY;
 
-const USER_PRODUCTS = {
-    0: ['F48337-GBYUSC-3867'],
-    1: ['F48337-GBYUSC-3867'],
-};
+async function getUserProductIds(walletAddress) {
+    const qObj = {
+        must: [{
+            text: {
+                path: ['owner'],
+                query: walletAddress
+            }
+        }]
+    };
+    
+    const params = new URLSearchParams({
+        limit: '100',
+        q: JSON.stringify(qObj),
+        p: JSON.stringify({ productId: 1 })
+    });
+
+    const response = await axios.get(
+        `${API_URL}/certificate/v2/search?${params.toString()}`,
+        {
+            headers: {
+                'accept': 'application/json; charset=utf-8',
+                'x-api-key': API_KEY
+            }
+        }
+    );
+    
+    return response.data.map(cert => cert.productId);
+}
 
 async function fetchProductDetails(productId) {
-    try {
-        const response = await axios.get(
-            `${API_URL}/productManagement/product/${productId}`,
-            {
-                headers: {
-                    'x-api-key': API_KEY
-                }
+    const response = await axios.get(
+        `${API_URL}/productManagement/product/${productId}`,
+        {
+            headers: {
+                'x-api-key': API_KEY
             }
-        );
-        
-        return response.data.data;
-        
-    } catch (error) {
-        console.error(`[Arianee] Error fetching product ${productId}:`, error.message);
-        return null;
-    }
+        }
+    );
+    
+    return response.data.data;
 }
 
 function extractAttributes(customAttributes) {
@@ -46,40 +65,11 @@ function extractAttributes(customAttributes) {
         }));
 }
 
-arianee.fetchUserNFTs = async function (uid) {
-    const productIds = USER_PRODUCTS[uid];
+arianee.fetchUserNFTs = async function (walletAddress) {
+    const productIds = await getUserProductIds(walletAddress);
     
-    if (!productIds || productIds.length === 0) {
-        return [];
-    }
-    
-    try {
-        const promises = productIds.map(async (productId) => {
-            const product = await fetchProductDetails(productId);
-            
-            if (!product) return null;
-            
-            return {
-                id: product.productId,
-                image: product.content.medias[0].url.replace(/&amp;/g, '&'),
-                title: `${product.content.name} ${product.content.model}`,
-                description: product.content.description.split('\n\n')[0],
-                url: `/nft/${product.productId}`
-            };
-        });
-        
-        const results = await Promise.all(promises);
-        return results.filter(nft => nft !== null);
-        
-    } catch (error) {
-        console.error('[Arianee] Error:', error);
-        return [];
-    }
-};
-
-arianee.fetchNFTById = async function (nftId, uid) {
-    try {
-        const product = await fetchProductDetails(nftId);
+    const promises = productIds.map(async (productId) => {
+        const product = await fetchProductDetails(productId);
         
         if (!product) return null;
         
@@ -87,17 +77,41 @@ arianee.fetchNFTById = async function (nftId, uid) {
             id: product.productId,
             image: product.content.medias[0].url.replace(/&amp;/g, '&'),
             title: `${product.content.name} ${product.content.model}`,
-            description: product.content.description,
-            attributes: extractAttributes(product.content.customAttributes),
-            reference: product.content.technicalReference,
-            serialNumber: product.content.serialnumber[0].value,
-            url: `/nft/${product.productId}`
+            description: product.content.description.split('\n\n')[0],
+            url: `/nft/${product.productId}`,
+            reference: product.content.technicalReference
         };
-        
-    } catch (error) {
-        console.error('[Arianee] Error:', error);
-        return null;
-    }
+    });
+    
+    const results = await Promise.all(promises);
+    const allNfts = results.filter(nft => nft !== null);
+    
+    const uniqueByReference = {};
+    allNfts.forEach(nft => {
+        if (!uniqueByReference[nft.reference]) {
+            uniqueByReference[nft.reference] = nft;
+        }
+    });
+    
+    return Object.values(uniqueByReference);
+};
+
+
+arianee.fetchNFTById = async function (nftId) {
+    const product = await fetchProductDetails(nftId);
+    
+    if (!product) return null;
+    
+    return {
+        id: product.productId,
+        image: product.content.medias[0].url.replace(/&amp;/g, '&'),
+        title: `${product.content.name} ${product.content.model}`,
+        description: product.content.description,
+        attributes: extractAttributes(product.content.customAttributes),
+        reference: product.content.technicalReference,
+        serialNumber: product.content.serialnumber[0].value,
+        url: `/nft/${product.productId}`
+    };
 };
 
 module.exports = arianee;
