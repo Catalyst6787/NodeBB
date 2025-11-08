@@ -34,19 +34,27 @@ pluginCollection.addRoutes = function (params) {
     ];
 
     const render = async function (req, res) {
-        const walletAddress = "0x766c409C2e8618fc570982b9acfF1E1c76a26201";
+        // const walletAddress = "0x766c409C2e8618fc570982b9acfF1E1c76a26201";
 
         const profileUid = res.locals.userData ? res.locals.userData.uid : req.uid;
+        let walletAddress;
+        try {
+            const Auth0 = require('nodebb-plugin-sso-auth0-publickey/library.js');
+            walletAddress = Auth0 && Auth0.getPublicKey ? Auth0.getPublicKey(profileUid) : undefined;
+        } catch (e) {
+            walletAddress = undefined;
+        }
+        console.log('[collection] walletAddress:', walletAddress, 'profileUid:', profileUid);
         const userData = await User.getUserData(profileUid);
         const isPublic = !userData.collectionPublic || userData.collectionPublic === '1';
 
         if (!isPublic && req.uid !== profileUid) {
-            return res.status(403).render('403', { title: 'Collection privée' });
+            return res.status(403).render('403', { title: 'Private collection' });
         }
 
         const payload = Object.assign({}, res.locals.userData);
         payload.title = 'Collection';
-        payload.items = await display_NFTs.getItems(walletAddress);
+        payload.items = walletAddress ? await display_NFTs.getItems(walletAddress) : [];
         payload.isPublic = isPublic;
         payload.isOwner = req.uid === profileUid;
         payload.uid = profileUid;
